@@ -33,7 +33,7 @@ db.Sequelize = Sequelize;
 db.User = require("./user") (sequelize ,DataTypes)
 db.Track = require("./tracks") (sequelize ,DataTypes)
 db.Album = require("./albums") (sequelize ,DataTypes)
-
+db.Auth = require("./auth") (sequelize ,DataTypes)
 
 
 db.User.hasMany(db.Album, {
@@ -52,7 +52,16 @@ db.Track.belongsTo(db.Album);
 
 
 
-// sequelize.sync({force:true})
+db.User.hasOne(db.Auth, {
+  onDelete: 'RESTRICT',
+  onUpdate: 'RESTRICT',
+});
+db.Auth.belongsTo(db.User);
+
+
+
+
+// sequelize.sync({alter: true })
 // .then(()=>{
 //   console.log("table created")
 // })

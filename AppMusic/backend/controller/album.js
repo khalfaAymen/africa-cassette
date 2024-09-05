@@ -1,10 +1,9 @@
 const db = require("../models/index")
-
-
+const { Op } = require('sequelize');
 module.exports = {
 
     getAll:(req,res)=>{
-        db.Album.findAll()
+        db.Album.findAll({include:[db.Track]})
         .then((data)=>{
             if(!data.length){
                 res.status(404).send({msg:"there is no data"})
@@ -18,8 +17,10 @@ module.exports = {
     },
 
     addAlbum:(req,res)=>{
-        const {albumName,albumDate} = req.body
-        db.Album.create(body)
+        const id = req.user.id
+        const body = req.body
+        db.Album.create({...body,userId:id})
+
         .then((data)=>{
             if(!body){
                 res.status(404).send({msg:"body require albumName && albumDate"})
@@ -34,11 +35,8 @@ module.exports = {
 
     deleteAlbum:(req,res)=>{
         const id = req.params.id
-        db.Album.create({where:{id:id}})
+        db.Album.destroy({where:{id:id}})
         .then((data)=>{
-            if(!data){
-                res.status(404).send({msg:"there is no data"})
-            }
             res.send('deleted')
         })
 
@@ -46,21 +44,25 @@ module.exports = {
             console.log(error)
         })
     },
-    updateAlbum:(req,res)=>{
-        const id = req.params.id
-        const body = req.body
-        db.Album.create(body)
-        .then((data)=>{
-            if(!data){
-                res.status(404).send({msg:"there is no data"})
+
+    getOne: (req,res)=>{
+        const title = req.params.title
+        db.Album.findAll({ 
+            where: { title:{
+                [Op.startsWith]:title
             }
+        },
+        include: [{
+            model: db.Track, 
+            as: 'tracks'    
+          }]
+    })
+        .then((data)=>{
             res.send(data)
         })
-
         .catch((error)=>{
             console.log(error)
         })
     },
-
 
 }
